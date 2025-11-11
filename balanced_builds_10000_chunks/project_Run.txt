@@ -1,0 +1,9 @@
+# Terminal 1 - Backend
+cd cicd_failure_prediction/backend
+source venv/bin/activate  # Linux/Mac
+# OR venv\Scripts\activate  # Windows
+python app.py
+
+# Terminal 2 - Frontend
+cd cicd_failure_prediction/frontend
+npm run dev
