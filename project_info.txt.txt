@@ -1,0 +1,205 @@
+Existing project GitHub repository for model training
+https://github.com/Judithokon/Machine-Learning-for-Pipeline-Failure-Prediction-and-Risk-Mitigation/blob/main/Pipeline%20Failure%20Prediction.ipynb?utm_source=chatgpt.com
+
+dataset:runs.json.gz
+
+Final Year Project Script
+
+Project Title: Failure Prediction in CI/CD Pipelines
+
+1. Problem Statement
+
+In modern software development, Continuous Integration/Continuous Deployment (CI/CD) pipelines are widely used to automate build, test, and deployment tasks.
+However, these pipelines often fail due to code errors, test failures, or configuration issues.
+The problem is that teams only know about a failure after it happens, causing delays, wasted developer effort, and sometimes production downtime.
+There is no early warning system that alerts developers about possible failures before the pipeline runs.
+
+2. Objective
+
+Predict CI/CD pipeline failures before execution using Machine Learning.
+
+Provide developers with real-time alerts and insights to reduce downtime.
+
+Improve productivity by analyzing historical pipeline logs and detecting risky commits.
+
+3. Dataset (Exact)
+
+We will use GitHub Actions logs dataset:
+
+File Name: runs.json.gz
+
+Source: GHALogs on Zenodo
+
+Attributes:
+
+run_id → Unique pipeline run ID
+
+repo → Repository name
+
+branch → Branch name
+
+commit_id → Commit hash
+
+event → Event type (push, PR, schedule)
+
+os → Execution environment (Ubuntu, Windows, etc.)
+
+status → Current status (queued, in_progress, completed)
+
+conclusion → Final result (success/failure) ✅ (target variable)
+
+created_at, updated_at → Time stamps
+
+duration → Pipeline run time
+
+👉 This dataset directly fits the project since it is GitHub CI/CD logs.
+
+4. Solution & Workflow
+Step 1: Data Preprocessing
+
+Extract useful features: commit size, branch, OS, test duration, previous build results.
+
+Handle missing values, encode categorical fields, normalize numeric features.
+
+Step 2: Model Training
+
+Algorithms to try:
+
+Logistic Regression
+
+Random Forest ✅ (best balance of accuracy & explainability)
+
+XGBoost (advanced, handles imbalance better)
+
+Target variable: conclusion (success/failure).
+
+Step 3: Database
+
+Store logs & predictions in MySQL.
+
+Example tables:
+
+pipeline_runs(run_id, repo, branch, commit_id, status, conclusion)
+
+predictions(run_id, predicted_status, probability, timestamp)
+
+Step 4: Backend (Flask API)
+
+Build an ML API that:
+
+Accepts pipeline run metadata (via POST request).
+
+Returns predicted probability of failure.
+
+Step 5: Frontend (React Dashboard)
+
+Show failure predictions, graphs, and trends.
+
+Visualizations: failure rate over time, branch-wise success rate, risky commits.
+
+Step 6: Integration with GitHub Actions
+
+Use GitHub Webhooks or API:
+
+GitHub → sends new pipeline run info to Flask API.
+
+API → predicts failure probability.
+
+If high risk → send Slack/Email alert.
+
+5. System Architecture Diagram
+
+Flow:
+GitHub Actions Logs → Data Preprocessing → ML Model → Prediction API (Flask) → MySQL DB → React Dashboard & Alerts
+
+6. Implementation Plan (12 Weeks)
+Week	Task
+1-2	Literature survey, dataset download, setup environment
+3-4	Data cleaning, preprocessing, feature engineering
+5-6	Train ML models (RF, XGBoost), evaluate accuracy
+7	Database setup (MySQL)
+8-9	Flask API development
+10	React Dashboard development
+11	GitHub integration & webhook testing
+12	Final testing, report, deployment
+7. Deployment Platform
+
+Backend (Flask API): Heroku / AWS EC2
+
+Frontend (React): Netlify / Vercel
+
+Database: MySQL (local or AWS RDS)
+
+CI/CD Logs Source: GitHub Actions ✅
+
+8. Example Functionality (Demo Flow)
+
+A developer pushes new code to GitHub repo.
+
+GitHub Actions triggers a pipeline run.
+
+Pipeline metadata (commit ID, branch, run ID, etc.) is sent to Flask API.
+
+ML Model predicts:
+
+Failure Probability = 82%
+
+Classification = “High Risk”
+
+Dashboard shows alert: “Pipeline likely to fail”.
+
+Developer gets notification (Slack/Email).
+
+9. Sample Python Code (Training + Prediction)
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Load dataset
+df = pd.read_json("runs.json.gz", lines=True)
+
+# Select features
+features = ["branch", "os", "event", "duration"]
+X = pd.get_dummies(df[features])  # Encode categorical
+y = df["conclusion"].apply(lambda x: 1 if x=="failure" else 0)
+
+# Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Evaluate
+y_pred = model.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+# Predict new run
+new_run = pd.DataFrame([{"branch":"main","os":"ubuntu","event":"push","duration":120}])
+new_run_enc = pd.get_dummies(new_run).reindex(columns=X.columns, fill_value=0)
+print("Prediction:", model.predict(new_run_enc))
+
+10. Machine Learning Algorithms to Use
+
+Random Forest (Best Balance) → Baseline
+
+XGBoost (Advanced) → Better accuracy, handles imbalanced data
+
+Logistic Regression (Simple baseline model)
+
+👉 Recommended: Random Forest + XGBoost
+
+✅ So, in summary:
+
+Dataset: runs.json.gz from GitHub Actions
+
+Database: MySQL
+
+ML Algorithms: Random Forest, XGBoost
+
+Frontend: React
+
+Backend: Flask
+
+Platform: GitHub Actions (easiest to integrate + dataset available)
